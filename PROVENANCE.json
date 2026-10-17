@@ -1,0 +1,18 @@
+{
+ "img/hero.jpg": {
+  "tool": "higgsfield",
+  "prompt": "art deco cinema marquee and projector beam (job cb65a076) gpt_image_2_5"
+ },
+ "snd/projector.mp3": {
+  "tool": "elevenlabs",
+  "prompt": "vintage film projector loop (flow 8av4Ta0LwvgeXGMhvGYX)"
+ },
+ "snd/bulbs.mp3": {
+  "tool": "elevenlabs",
+  "prompt": "marquee bulbs clicking on (flow 8av4Ta0LwvgeXGMhvGYX)"
+ },
+ "snd/applause.mp3": {
+  "tool": "elevenlabs",
+  "prompt": "premiere applause (flow 8av4Ta0LwvgeXGMhvGYX)"
+ }
+}

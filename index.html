@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- STYLE: Art deco movie palace (marquee bulbs, Limelight letters, velvet red and projector gold) | WHY: Theresa is a documentary filmmaker and her film Game On is now required viewing in Gordon's USC course, so the gift is her name in lights | ALT: Film-strip timeline, rejected as a resume rather than a celebration -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Now Playing</title>
+<meta name="description" content="Your film, in lights.">
+<meta property="og:title" content="Now Playing, for Theresa">
+<meta property="og:image" content="https://gordonusc.github.io/gift-theresa/img/hero.jpg">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Lora:ital,wght@0,500;1,500&display=swap">
+<style>
+:root{--gold:#f2c66d;--red:#8e1b2c;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0d0507;color:#fff4e2;font:16px/1.5 Lora,Georgia,serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.stage{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(100vw,calc(100svh*9/16));overflow:hidden}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.5);transition:filter 1.5s}
+.stage.lit .bg{filter:brightness(.9)}
+.marquee{position:absolute;left:8%;right:8%;top:calc(env(safe-area-inset-top,0px) + 7%);padding:18px 12px;border-radius:10px;background:#1b0b0ee6;border:3px solid var(--gold);text-align:center}
+.bulbs{display:flex;justify-content:space-between;margin:0 4px 10px}
+.bulbs i{width:10px;height:10px;border-radius:50%;background:#5a4422;transition:background .1s,box-shadow .1s}
+.bulbs i.on{background:#fff2c2;box-shadow:0 0 10px #ffd27a}
+.letters{font:400 clamp(20px,6.5vw,30px)/1.3 Limelight,serif;color:var(--gold);min-height:3.9em;display:flex;flex-direction:column;justify-content:center}
+.letters span{opacity:0;transition:opacity .3s}
+.letters span.on{opacity:1}
+.sub{font-style:italic;font-size:14px;margin-top:8px;opacity:0;transition:opacity .8s}
+.lit .sub{opacity:1}
+.reel{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:120px;height:120px;border-radius:50%;border:6px solid var(--gold);background:radial-gradient(circle,#2a1a10 22%,transparent 23%),repeating-conic-gradient(#3b2614 0 30deg,#1a0f08 30deg 60deg);cursor:pointer;box-shadow:0 0 30px #f2c66d55}
+.reel.spin{animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+.hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 170px);text-align:center;font-size:14px;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 8px #000}
+.foot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);text-align:center;font-size:11px;opacity:.6}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <img class="bg" src="img/hero.jpg" alt="An art deco cinema with a glowing marquee and a projector beam">
+  <div class="marquee">
+    <div class="bulbs" id="bulbs"></div>
+    <div class="letters"><span>NOW PLAYING</span><span>GAME ON</span><span>A FILM BY THERESA LOONG</span></div>
+    <div class="sub">Required viewing in Gordon's USC course this semester. Your film is teaching the next generation of game makers.</div>
+  </div>
+  <div class="hint" id="hint">Tap the reel three times to thread the projector</div>
+  <div class="reel" id="reel" role="button" aria-label="Film reel"></div>
+  <div class="foot">made by Darby, Gordon's AI assistant, with love from Gordon</div>
+</div>
+<script>
+// ElevenLabs sound design: projector loop, marquee bulbs, premiere applause. Code only mixes.
+let ac=null, master=null, bufs={}, proj=null, taps=0;
+function audio(){ if(!ac){ try{ ac=new (window.AudioContext||window.webkitAudioContext)(); master=ac.createGain(); master.gain.value=.9; master.connect(ac.destination); ['projector','bulbs','applause'].forEach(load);}catch(e){} } if(ac&&ac.state==='suspended') ac.resume(); return ac; }
+async function load(n){ if(bufs[n]) return bufs[n]; try{ const r=await fetch('snd/'+n+'.mp3'); const a=await r.arrayBuffer(); bufs[n]=await new Promise((ok,no)=>ac.decodeAudioData(a,ok,no)); }catch(e){} return bufs[n]; }
+async function play(n,vol=1,loop=false){ if(!audio()) return null; const b=await load(n); if(!b) return null; const s=ac.createBufferSource(), g=ac.createGain(); s.buffer=b; s.loop=loop; g.gain.value=vol; s.connect(g).connect(master); s.start(); return {s,g}; }
+const bulbs=document.getElementById('bulbs'); for(let i=0;i<14;i++) bulbs.appendChild(document.createElement('i'));
+const B=[...bulbs.children], L=[...document.querySelectorAll('.letters span')];
+document.getElementById('reel').onclick=async()=>{ audio(); if(taps>=3) return; taps++; const reel=document.getElementById('reel'); reel.classList.add('spin');
+  if(taps===1) proj=await play('projector',.55,true);
+  L[taps-1].classList.add('on'); play('bulbs',.7); B.forEach((b,i)=>setTimeout(()=>b.classList.toggle('on',i%3===taps%3||taps===3),i*40));
+  if(taps===3){ document.getElementById('hint').textContent='Premiere night'; setTimeout(()=>{ document.getElementById('stage').classList.add('lit'); play('applause',.85); if(proj) proj.g.gain.setTargetAtTime(.2,ac.currentTime,.6); let f=0; setInterval(()=>{ B.forEach((b,i)=>b.classList.toggle('on',(i+f)%2===0)); f++; },260); },700); } };
+</script>
+</body>
+</html>
